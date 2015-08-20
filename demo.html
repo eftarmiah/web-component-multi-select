@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="bower_components/webcomponentsjs/webcomponents.min.js"></script>
+    <!--script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script-->
+    <link rel="import" href="select-transfer.html" />
+    <style>
+        select-transfer chosen {
+            min-width: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>&lt;select-transfer/&gt; Web component</h1>
+
+<pre style="background-color: lightgrey;border: 1px solid grey;">
+    <code>
+&lt;select-transfer id=&quot;types&quot;&gt;
+    &lt;choices&gt;
+        &lt;label&gt;Available stores:&lt;/label&gt;
+        &lt;option value=&quot;1&quot;&gt;news&lt;/option&gt;
+        &lt;option value=&quot;2&quot;&gt;assets&lt;/option&gt;
+        &lt;option value=&quot;5&quot;&gt;Brands&lt;/option&gt;
+        &lt;option value=&quot;7&quot;&gt;Collections&lt;/option&gt;
+        &lt;option value=&quot;8&quot;&gt;Projects&lt;/option&gt;
+    &lt;/choices&gt;
+    &lt;chosen&gt;
+        &lt;label&gt;Selected stores:&lt;/label&gt;
+        &lt;option value=&quot;5&quot;&gt;Brands&lt;/option&gt;
+    &lt;/chosen&gt;
+&lt;/select-transfer&gt;
+    </code>
+</pre>
+
+<select-transfer id="types">
+    <choices>
+        <label>Available stores:</label>
+        <option value="1">news</option>
+        <option value="2">assets</option>
+        <option value="5">Brands</option>
+        <option value="7">Collections</option>
+        <option value="8">Projects</option>
+    </choices>
+    <chosen>
+        <label>Selected stores:</label>
+        <option value="5">Brands</option>
+    </chosen>
+</select-transfer>
+
+
+
+</body>
+</html>

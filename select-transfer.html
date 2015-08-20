@@ -1,0 +1,219 @@
+<link rel="import" href="bower_components/polymer/polymer.html"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+
+<polymer-element name="select-transfer" attributes="name">
+    <template>
+        <style>
+            :host {
+
+            }
+
+            .multiSelect{
+                overflow: hidden;
+                display:block;
+                position: relative;
+            }
+
+            .component {
+                float:left;
+            }
+            .component, label {
+                display: block;
+            }
+            .component:nth-child(2) input {
+                display: block;
+            }
+
+        </style>
+        <div class="multiSelect">
+            <div class="component">
+                <template bind if="[[choice_label]]">
+                    <label for="ms_choices" class="label">[[choice_label.textContent]]</label>
+                </template>
+                <select on-dblclick="[[transferRight]]" name="ms_choices" id="ms_choices" multiple="true">
+                <template repeat="{{item in choices}}">
+                    <option value="{{item.value}}">{{item.text}}</option>
+                </template>
+                </select>
+            </div>
+            <div class="component">
+                <input type="button" on-click="[[transferRight]]" value="[[actions.right]]" name="right"/>
+                <input type="button" on-click="[[transferAllRight]]" value="[[actions.allRight]]"  name="allRight"/>
+                <input type="button" on-click="[[transferLeft]]" value="[[actions.left]]"  name="left"/>
+                <input type="button" on-click="[[transferAllLeft]]" value="[[actions.allLeft]]"  name="allLeft"/>
+            </div>
+            <div class="component">
+                <template bind if="[[chosen_label]]">
+                    <label for="ms_choices" class="label">[[chosen_label.textContent]]</label>
+                </template>
+                <select on-dblclick="[[transferLeft]]" name="ms_chosen" id="ms_chosen" multiple="true">
+                    <template repeat="{{item in chosen}}">
+                        <option value="{{item.value}}">{{item.text}}</option>
+                    </template>
+                </select>
+            </div>
+        </div>
+    </template>
+    <script>
+
+        Polymer({
+
+            all:{},
+            choices: [],
+            chosen: [],
+            actions: {
+                "right": ">",
+                "allRight":">>",
+                "left":"<",
+                "allLeft":"<<"
+            },
+            detachedCallback:function() {
+                console.log('detached');
+            },
+            attachedCallback:function() {
+                console.log('domReady_ attached');
+            },
+
+            created: function() {
+                this.all = {};
+                this.choices = [];
+                this.chosen = [];
+                this.actions = {
+                    "right": ">",
+                    "allRight":">>",
+                    "left":"<",
+                    "allLeft":"<<"
+                };
+
+                this.choice_label= this.querySelector('choices > label');
+                this.chosen_label= this.querySelector('chosen > label');
+
+                var choices = this.querySelectorAll('choices > option');
+                var chosen = this.querySelectorAll('chosen > option');
+
+                for(var n=0; n<chosen.length; n++) {
+                    var item = chosen[n];
+                    var text = item.textContent;
+                    var val = item.getAttribute('value');
+                    if (!text && !val) {
+                        continue;//ignore item as both values are emty
+                    } if (!text) {
+                        text = val;
+                    } if (!val) {
+                        val = text;
+                    }
+                    var json = {text:text, value: val};
+                    this.chosen.push(json);
+                    this.all[val]=text;
+                }
+
+                for(var n=0;n<choices.length; n++) {
+                    var item = choices[n];
+                    var text = item.textContent;
+                    var val = item.getAttribute('value');
+                    if (!text && !val) {
+                        continue;//ignore item as both values are emty
+                    } if (!text) {
+                        text = val;
+                    } if (!val) {
+                        val = text;
+                    }
+                    //check for duplicates
+                    if (!this.isChosenValue(val)) {
+                        var json = {text: text, value: val};
+                        this.choices.push(json);
+                        this.all[val] = text;
+                    } else {
+                        //remove any item which has been chosen
+                        jQuery(this).find("> choices > option:nth("+n+")").remove();
+                    }
+                }
+                console.log('created');
+            },
+
+            ready: function() {
+                console.log('ready');
+            },
+
+            isChoiceValue: function(value) {
+                for(var n=0; n< this.choices.length; n++) {
+                    if (this.choices[n].value === value) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+
+            isChosenValue:function(value){
+                for(var n=0; n< this.chosen.length; n++) {
+                    if (this.chosen[n].value === value) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+
+//            isChosenValue:function(value){
+//                for(var n=0; n< this.chosen.length; n++) {
+//                    if (this.chosen[n].value === value) {
+//                        return {
+//                            found:true,
+//                            index: n,
+//                            name: this.chosen[n].name,
+//                            value: this.chosend[n].value,
+//                            type:"chosen"
+//                        };
+//                    }
+//                }
+//                return {
+//                    found:false
+//                };
+//            },
+
+            transferRight:function(event, detail, sender){
+                console.log('transferRight', this, event,detail, sender);
+                var options = this.$.ms_choices.selectedOptions;
+                for (var n=0; n<options.length;n++) {
+                    var index = options[n].index;
+                    var old = this.choices[index];
+                    this.choices.splice(index,1);
+                    this.chosen.push(old);
+                    jQuery('> chosen', this).append(jQuery('> choices > option:nth('+index + ')', this));
+                }
+                this.fire('transfer-right');
+            },
+            transferLeft:function(event, detail, sender){
+                console.log('transferLeft', this,event,detail, sender);
+                var options = this.$.ms_chosen.selectedOptions;
+                for (var n=0; n<options.length;n++) {
+                    var index = options[n].index;
+                    var old = this.chosen[index];
+                    this.chosen.splice(index,1);
+                    this.choices.push(old);
+                    jQuery('> choices', this).append(jQuery('> chosen > option:nth('+index + ")", this));
+                }
+                this.fire('transfer-left');
+            },
+            transferAllRight: function(event, detail, sender){
+                console.log('transferAllRight', this, event,detail, sender);
+                var size = this.choices.length;
+                for (var n =0; n<size;n++) {
+                    this.chosen.push(this.choices.pop());
+                }
+                jQuery('> chosen', this).append(jQuery('> choices > option', this));
+                this.fire('transfer-all-right');
+            },
+            transferAllLeft: function(event, detail, sender) {
+                console.log('transferAllLeft', this,event,detail, sender);
+                var size = this.chosen.length;
+                for (var n =0; n<size;n++) {
+                    this.choices.push(this.chosen.pop());
+                }
+                jQuery('> choices', this).append(jQuery('> chosen > option',this));
+                this.fire('transfer-all-left');
+            }
+        });
+    </script>
+
+</polymer-element>
